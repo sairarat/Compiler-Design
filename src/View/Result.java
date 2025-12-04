@@ -36,7 +36,7 @@ public class Result {
         resultTextArea.setForeground(CustomColors.PURPLE);
         resultTextArea.setEditable(false);
         resultTextArea.setMargin(new Insets(20, 20, 20, 20));
-        resultTextArea.setText("Click 'Open File' or 'Lexical' to begin!");
+        resultTextArea.setText("Click 'Open File' to begin!");
 
         JScrollPane scroll = new JScrollPane(resultTextArea);
         scroll.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));

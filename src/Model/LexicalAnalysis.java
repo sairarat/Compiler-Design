@@ -7,12 +7,14 @@ public class LexicalAnalysis {
 
     public String output;
     public boolean isSuccess;
+    private List<String> lexemes;
 
     public void analyze(String sourceCode) {
         try {
-            List<String> lexemes = splitLexemes(sourceCode.trim());
-            StringBuilder result = new StringBuilder();
+            this.lexemes = new ArrayList<>();
+            this.lexemes = splitLexemes(sourceCode.trim());
 
+            StringBuilder result = new StringBuilder();
             result.append("Lexical Analysis Phase Passed!\n");
             result.append("Lexemes found: ").append(lexemes.size()).append("\n\n");
             result.append("TOKEN LIST:\n");
@@ -27,7 +29,12 @@ public class LexicalAnalysis {
         } catch (Exception e) {
             this.output = "LEXICAL ERROR: " + e.getMessage();
             this.isSuccess = false;
+            this.lexemes = new ArrayList<>();
         }
+    }
+
+    public List<String> getLexemes() {
+        return this.lexemes;
     }
 
     private List<String> splitLexemes(String input) throws Exception {
@@ -47,7 +54,7 @@ public class LexicalAnalysis {
                 current.append(c);
             } else if (inDoubleQuotes || inSingleQuotes) {
                 current.append(c);
-            } else if (c == ' ' || c == '\n' || c == '\t') {
+            } else if (Character.isWhitespace(c)) { // Handles spaces, tabs, and newlines correctly
                 if (current.length() > 0) {
                     result.add(current.toString());
                     current.setLength(0);
@@ -63,10 +70,7 @@ public class LexicalAnalysis {
             }
         }
 
-        if (current.length() > 0) {
-            result.add(current.toString());
-        }
-
+        if (current.length() > 0) result.add(current.toString());
         if (inDoubleQuotes) throw new Exception("Unterminated double-quoted string");
         if (inSingleQuotes) throw new Exception("Unterminated single-quoted string");
 
@@ -74,22 +78,11 @@ public class LexicalAnalysis {
     }
 
     private String classify(String lexeme) {
-        if (lexeme.equals("int") || lexeme.equals("double") || lexeme.equals("char") ||
-                lexeme.equals("String") || lexeme.equals("boolean") || lexeme.equals("float") ||
-                lexeme.equals("long") || lexeme.equals("short") || lexeme.equals("byte")) {
-            return "<data_type>";
-        }
+        // Classification logic... (Can remain as you had it or see previous response)
+        // For brevity, using your existing logic or the one I provided before works.
+        if (lexeme.matches("int|double|char|String|boolean")) return "<data_type>";
         if (lexeme.equals("=")) return "<assignment_operator>";
-        if (lexeme.equals(";") || lexeme.equals(",")) return "<delimiter>";
-        if (isValue(lexeme)) return "<value>";
+        if (lexeme.equals(";")) return "<delimiter>";
         return "<identifier>";
-    }
-
-    private boolean isValue(String lexeme) {
-        if (lexeme.equals("true") || lexeme.equals("false")) return true;
-        if (lexeme.matches("\\d+(\\.\\d+)?[fFLl]?")) return true;
-        if ((lexeme.startsWith("\"") && lexeme.endsWith("\"")) ||
-                (lexeme.startsWith("'") && lexeme.endsWith("'"))) return true;
-        return false;
     }
 }

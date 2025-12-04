@@ -1,3 +1,4 @@
+// File: View/SourceCode.java
 package View;
 
 import View.Constants.CustomColors;
@@ -6,7 +7,7 @@ import java.awt.*;
 
 public class SourceCode {
 
-    private static JTextArea textArea; // ← only new field
+    private static JTextArea textArea;
 
     public static JPanel create(String title) {
         JPanel panel = new JPanel(new BorderLayout());
@@ -49,8 +50,11 @@ public class SourceCode {
     }
 
     public static String getCode() {
-        {
-            return textArea != null ? textArea.getText() : "";
-        }
+        return textArea != null ? textArea.getText() : "";
+    }
+
+    // This is the method your new Lexical button needs
+    public static String getText() {
+        return getCode(); // Alias for clarity — both do the same
     }
 }

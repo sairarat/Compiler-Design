@@ -2,21 +2,47 @@ package View;
 
 import View.Constants.CustomColors;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.net.URL;
 
 public class Button {
 
     private static final Font BUTTON_FONT = new Font("Segoe UI", Font.BOLD, 23);
 
-    // Main pink buttons
+    // Images
     private static final ImageIcon BTN_NORMAL  = loadImage("Assets/Pink Button.png");
     private static final ImageIcon BTN_HOVER   = loadImage("Assets/Pink Button Hover.png");
     private static final ImageIcon BTN_PRESSED = loadImage("Assets/Pink Button Pressed.png");
 
     private static ImageIcon loadImage(String path) {
-        java.net.URL url = Button.class.getResource("/" + path);
+        URL url = Button.class.getResource("/" + path);
         return (url != null) ? new ImageIcon(url) : null;
+    }
+
+    // --- SOUND METHOD ---
+    private static void playClickSound() {
+        try {
+            // Updated to look for your new .wav file
+            URL url = Button.class.getResource("/Assets/Click Sound.wav");
+
+            if (url != null) {
+                // Open and play the sound clip
+                AudioInputStream audioIn = AudioSystem.getAudioInputStream(url);
+                Clip clip = AudioSystem.getClip();
+                clip.open(audioIn);
+                clip.start();
+            } else {
+                System.err.println("Sound file not found! Check 'src/Assets/Click Sound.wav'");
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // Prints error if file is corrupt or unreadable
+        }
     }
 
     // Custom Sidebar Buttons
@@ -33,6 +59,14 @@ public class Button {
                 setPreferredSize(new Dimension(250, 110));
                 setMinimumSize(new Dimension(250, 110));
                 setMaximumSize(new Dimension(250, 110));
+
+                // Add Sound Listener
+                addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        playClickSound();
+                    }
+                });
             }
 
             @Override
@@ -72,7 +106,7 @@ public class Button {
         };
     }
 
-    // Image-only button: Toggle between Source Code Frame and Result Frame
+    // Image-only button
     public static JButton createImageOnlyButton(String imagePath) {
         return new JButton() {
             private final ImageIcon normal  = loadImage(imagePath);
@@ -88,6 +122,14 @@ public class Button {
                 setPreferredSize(new Dimension(96, 96));
                 setMinimumSize(new Dimension(96, 96));
                 setMaximumSize(new Dimension(96, 96));
+
+                // Add Sound Listener
+                addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        playClickSound();
+                    }
+                });
             }
 
             @Override
