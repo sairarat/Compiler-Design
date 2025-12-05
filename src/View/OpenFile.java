@@ -58,9 +58,11 @@ public class OpenFile {
             SourceCode.setCode("");
             Result.setResultText("Click 'Open File' or 'Lexical' to begin!");
             fileLoaded = false;
-            for (JButton b : analysisButtons) b.setVisible(false);
+            for (JButton b : analysisButtons)
+                b.setVisible(false);
             clearButton.setVisible(false);
-            if (Result.isShowingSource()) Result.toggleSourceCode();
+            if (Result.isShowingSource())
+                Result.toggleSourceCode();
         });
         leftPanel.add(clearButton);
         leftPanel.add(Box.createVerticalStrut(14));
@@ -82,6 +84,36 @@ public class OpenFile {
         center.setBorder(BorderFactory.createEmptyBorder(20, 20, 40, 60));
         center.add(leftPanel, BorderLayout.WEST);
         center.add(resultPanel, BorderLayout.CENTER);
+
+        // === RUN ANALYSIS BUTTON LISTENER (for Source Code panel) ===
+        SourceCode.setRunAnalysisListener(e -> {
+            String code = SourceCode.getText().trim();
+
+            if (code.isEmpty()) {
+                CustomDialog.showMessage(main, "Empty Code", "Please enter some code to analyze!", true);
+                return;
+            }
+
+            // Enable all analysis buttons
+            fileLoaded = true;
+            for (JButton b : analysisButtons) {
+                b.setVisible(true);
+            }
+            clearButton.setVisible(true);
+
+            // Run Lexical Analysis
+            LexicalAnalysis lexer = new LexicalAnalysis();
+            lexer.analyze(code);
+            Result.setResultText(lexer.output);
+
+            // Switch back to Result view to show analysis
+            if (Result.isShowingSource()) {
+                Result.toggleSourceCode();
+            }
+
+            // Show success message
+            CustomDialog.showMessage(main, "Success!", "Code analyzed successfully!", false);
+        });
 
         main.add(center, BorderLayout.CENTER);
         return main;
@@ -107,11 +139,12 @@ public class OpenFile {
                     lexer.analyze(code);
                     Result.setResultText(lexer.output);
 
-                    if (Result.isShowingSource()) Result.toggleSourceCode();
+                    if (Result.isShowingSource())
+                        Result.toggleSourceCode();
 
                     // Reveal buttons smoothly with animation
                     Timer timer = new Timer();
-                    int[] step = {0};
+                    int[] step = { 0 };
                     timer.scheduleAtFixedRate(new TimerTask() {
                         @Override
                         public void run() {
@@ -147,7 +180,8 @@ public class OpenFile {
             LexicalAnalysis lexer = new LexicalAnalysis();
             lexer.analyze(code);
             Result.setResultText(lexer.output);
-            if (Result.isShowingSource()) Result.toggleSourceCode();
+            if (Result.isShowingSource())
+                Result.toggleSourceCode();
 
             // --- 3. SYNTAX ANALYSIS BUTTON ---
         } else if ("Syntax".equals(text) && fileLoaded) {
@@ -169,7 +203,8 @@ public class OpenFile {
                 CustomDialog.showMessage(parent, "Lexical Error", "Fix lexical errors before checking syntax!", true);
             }
 
-            if (Result.isShowingSource()) Result.toggleSourceCode();
+            if (Result.isShowingSource())
+                Result.toggleSourceCode();
 
             // --- 4. SEMANTIC ANALYSIS BUTTON ---
         } else if ("Semantics".equals(text) && fileLoaded) {
@@ -188,10 +223,12 @@ public class OpenFile {
                 Result.setResultText(semantic.output);
             } else {
                 Result.setResultText("Semantic Analysis Aborted.\nLexical Errors found:\n\n" + lexer.output);
-                CustomDialog.showMessage(parent, "Lexical Error", "Fix lexical errors before checking semantics!", true);
+                CustomDialog.showMessage(parent, "Lexical Error", "Fix lexical errors before checking semantics!",
+                        true);
             }
 
-            if (Result.isShowingSource()) Result.toggleSourceCode();
+            if (Result.isShowingSource())
+                Result.toggleSourceCode();
         }
     }
 }

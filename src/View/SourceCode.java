@@ -4,10 +4,12 @@ package View;
 import View.Constants.CustomColors;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 
 public class SourceCode {
 
     private static JTextArea textArea;
+    private static ActionListener runAnalysisListener;
 
     public static JPanel create(String title) {
         JPanel panel = new JPanel(new BorderLayout());
@@ -37,7 +39,23 @@ public class SourceCode {
         scroll.setPreferredSize(new Dimension(380, 360));
 
         panel.add(scroll, BorderLayout.CENTER);
-        panel.setPreferredSize(new Dimension(400, 440));
+
+        // Run Analysis Button
+        JButton runButton = Button.createCuteButton("Run Analysis");
+        runButton.setPreferredSize(new Dimension(200, 45));
+        runButton.addActionListener(e -> {
+            if (runAnalysisListener != null) {
+                runAnalysisListener.actionPerformed(e);
+            }
+        });
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setOpaque(false);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 10, 0));
+        buttonPanel.add(runButton);
+
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+        panel.setPreferredSize(new Dimension(400, 500));
 
         return panel;
     }
@@ -56,5 +74,10 @@ public class SourceCode {
     // This is the method your new Lexical button needs
     public static String getText() {
         return getCode(); // Alias for clarity — both do the same
+    }
+
+    // Method to set the Run Analysis button listener
+    public static void setRunAnalysisListener(ActionListener listener) {
+        runAnalysisListener = listener;
     }
 }
