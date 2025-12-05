@@ -2,11 +2,15 @@ package View;
 
 import View.Constants.CustomColors;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.net.URL;
 
 public class TitleBar extends JPanel {
 
@@ -33,6 +37,21 @@ public class TitleBar extends JPanel {
         enableWindowDrag();
     }
 
+    // --- SOUND METHOD ---
+    private void playClickSound() {
+        try {
+            URL url = TitleBar.class.getResource("/Assets/Click Sound.wav");
+            if (url != null) {
+                AudioInputStream audioIn = AudioSystem.getAudioInputStream(url);
+                Clip clip = AudioSystem.getClip();
+                clip.open(audioIn);
+                clip.start();
+            }
+        } catch (Exception e) {
+            // silent fail
+        }
+    }
+
     private JPanel createLeftPanel() {
         JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 25, 0));
         left.setOpaque(false);
@@ -50,16 +69,28 @@ public class TitleBar extends JPanel {
         controls.setOpaque(false);
         controls.setPreferredSize(new Dimension(180, 70));
 
+        // --- MINIMIZE BUTTON ---
         JLabel minBtn = createScaledImageButton(ICON_MINIMIZE);
         minBtn.addMouseListener(new MouseAdapter() {
-            @Override public void mouseClicked(MouseEvent e) {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                playClickSound(); // Play sound on press
+            }
+            @Override
+            public void mouseClicked(MouseEvent e) {
                 frame.setState(JFrame.ICONIFIED);
             }
         });
 
+        // --- RESIZE BUTTON ---
         JLabel resizeBtn = createScaledImageButton(ICON_RESIZE);
         resizeBtn.addMouseListener(new MouseAdapter() {
-            @Override public void mouseClicked(MouseEvent e) {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                playClickSound(); // Play sound on press
+            }
+            @Override
+            public void mouseClicked(MouseEvent e) {
                 if (frame.getExtendedState() == JFrame.MAXIMIZED_BOTH) {
                     frame.setExtendedState(JFrame.NORMAL);
                 } else {
@@ -68,13 +99,25 @@ public class TitleBar extends JPanel {
             }
         });
 
+        // --- CLOSE BUTTON ---
         JLabel closeBtn = createScaledImageButton(ICON_CLOSE);
         closeBtn.addMouseListener(new MouseAdapter() {
-            @Override public void mouseClicked(MouseEvent e) { System.exit(0); }
-            @Override public void mouseEntered(MouseEvent e) {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                playClickSound(); // Play sound on press
+            }
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // Short delay to ensure sound starts before JVM kills the app
+                try { Thread.sleep(100); } catch (InterruptedException ignored) {}
+                System.exit(0);
+            }
+            @Override
+            public void mouseEntered(MouseEvent e) {
                 closeBtn.setIcon(ICON_CLOSE_HOVER != null ? scaleIcon(ICON_CLOSE_HOVER) : scaleIcon(ICON_CLOSE));
             }
-            @Override public void mouseExited(MouseEvent e) {
+            @Override
+            public void mouseExited(MouseEvent e) {
                 closeBtn.setIcon(scaleIcon(ICON_CLOSE));
             }
         });

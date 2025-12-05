@@ -40,9 +40,15 @@ public class SourceCode {
 
         panel.add(scroll, BorderLayout.CENTER);
 
-        // Run Analysis Button
         JButton runButton = Button.createCuteButton("Run Analysis");
-        runButton.setPreferredSize(new Dimension(200, 45));
+
+        Dimension btnSize = new Dimension(250, 90);
+        runButton.setPreferredSize(btnSize);
+        runButton.setMinimumSize(btnSize);
+        runButton.setMaximumSize(btnSize);
+
+        runButton.setFont(new Font("Segoe UI", Font.BOLD, 18));
+
         runButton.addActionListener(e -> {
             if (runAnalysisListener != null) {
                 runAnalysisListener.actionPerformed(e);
@@ -71,12 +77,10 @@ public class SourceCode {
         return textArea != null ? textArea.getText() : "";
     }
 
-    // This is the method your new Lexical button needs
     public static String getText() {
-        return getCode(); // Alias for clarity — both do the same
+        return getCode();
     }
 
-    // Method to set the Run Analysis button listener
     public static void setRunAnalysisListener(ActionListener listener) {
         runAnalysisListener = listener;
     }

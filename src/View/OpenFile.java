@@ -19,11 +19,10 @@ public class OpenFile {
     private static JButton clearButton;
 
     public static JPanel createUI() {
-        JPanel main = new JPanel(new BorderLayout());
-        main.setBackground(CustomColors.MAIN_BG);
+        JPanel main = new GridGradientPanel(new BorderLayout());
         main.setBorder(BorderFactory.createLineBorder(CustomColors.PURPLE, 4, true));
 
-        // Clear Button (hidden until file loaded)
+        // Clear Button
         clearButton = Button.createCuteButton("Clear");
         clearButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         clearButton.setVisible(false);
@@ -32,9 +31,9 @@ public class OpenFile {
 
         JPanel leftPanel = new JPanel();
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
-        leftPanel.setBackground(CustomColors.MAIN_BG);
-        // Reduced top padding → starts higher up!
-        leftPanel.setBorder(BorderFactory.createEmptyBorder(30, 60, 50, 60));
+        leftPanel.setOpaque(false);
+        // Reduced side padding slightly
+        leftPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 50, 30));
 
         for (int i = 0; i < buttonTexts.length; i++) {
             String text = buttonTexts[i];
@@ -49,8 +48,9 @@ public class OpenFile {
             btn.addActionListener(e -> handleButtonClick(text, main));
 
             leftPanel.add(btn);
-            // Spacing between buttons
-            leftPanel.add(Box.createVerticalStrut(i == 0 ? 20 : 14));
+
+            // UPDATED: Reduced gap between buttons (was 14, now 6)
+            leftPanel.add(Box.createVerticalStrut(i == 0 ? 15 : 6));
         }
 
         // === CLEAR BUTTON LOGIC ===
@@ -58,23 +58,21 @@ public class OpenFile {
             SourceCode.setCode("");
             Result.setResultText("Click 'Open File' or 'Lexical' to begin!");
             fileLoaded = false;
-            for (JButton b : analysisButtons)
-                b.setVisible(false);
+            for (JButton b : analysisButtons) b.setVisible(false);
             clearButton.setVisible(false);
-            if (Result.isShowingSource())
-                Result.toggleSourceCode();
+            if (Result.isShowingSource()) Result.toggleSourceCode();
         });
         leftPanel.add(clearButton);
-        leftPanel.add(Box.createVerticalStrut(14));
+        leftPanel.add(Box.createVerticalStrut(6)); // Reduced gap
 
-        // === TOGGLE BUTTON (Eye Icon) ===
+        // === TOGGLE BUTTON ===
         JButton toggleBtn = Button.createImageOnlyButton("Assets/Source Button.png");
         toggleBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         toggleBtn.setToolTipText("Toggle Source Code Result");
         toggleBtn.addActionListener(e -> Result.toggleSourceCode());
 
         leftPanel.add(toggleBtn);
-        leftPanel.add(Box.createVerticalStrut(60)); // Bottom padding
+        leftPanel.add(Box.createVerticalStrut(60));
 
         // Right side (Result Panel)
         JPanel resultPanel = Result.create();
@@ -85,33 +83,20 @@ public class OpenFile {
         center.add(leftPanel, BorderLayout.WEST);
         center.add(resultPanel, BorderLayout.CENTER);
 
-        // === RUN ANALYSIS BUTTON LISTENER (for Source Code panel) ===
+        // ... (Rest of logic remains the same)
         SourceCode.setRunAnalysisListener(e -> {
             String code = SourceCode.getText().trim();
-
             if (code.isEmpty()) {
                 CustomDialog.showMessage(main, "Empty Code", "Please enter some code to analyze!", true);
                 return;
             }
-
-            // Enable all analysis buttons
             fileLoaded = true;
-            for (JButton b : analysisButtons) {
-                b.setVisible(true);
-            }
+            for (JButton b : analysisButtons) b.setVisible(true);
             clearButton.setVisible(true);
-
-            // Run Lexical Analysis
             LexicalAnalysis lexer = new LexicalAnalysis();
             lexer.analyze(code);
             Result.setResultText(lexer.output);
-
-            // Switch back to Result view to show analysis
-            if (Result.isShowingSource()) {
-                Result.toggleSourceCode();
-            }
-
-            // Show success message
+            if (Result.isShowingSource()) Result.toggleSourceCode();
             CustomDialog.showMessage(main, "Success!", "Code analyzed successfully!", false);
         });
 
@@ -120,48 +105,35 @@ public class OpenFile {
     }
 
     private static void handleButtonClick(String text, JPanel parent) {
-
-        // --- 1. OPEN FILE ---
         if ("Open File".equals(text)) {
-            JFileChooser chooser = new JFileChooser(".");
+            CustomFileChooser chooser = new CustomFileChooser(".");
             chooser.setFileFilter(new FileNameExtensionFilter("Java & Text Files", "java", "txt"));
 
             if (chooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
                 try {
                     File file = chooser.getSelectedFile();
                     String code = java.nio.file.Files.readString(file.toPath());
-
                     SourceCode.setCode(code);
                     fileLoaded = true;
-
-                    // Run Lexical Analysis immediately on load to verify basic structure
                     LexicalAnalysis lexer = new LexicalAnalysis();
                     lexer.analyze(code);
                     Result.setResultText(lexer.output);
+                    if (Result.isShowingSource()) Result.toggleSourceCode();
 
-                    if (Result.isShowingSource())
-                        Result.toggleSourceCode();
-
-                    // Reveal buttons smoothly with animation
                     Timer timer = new Timer();
                     int[] step = { 0 };
                     timer.scheduleAtFixedRate(new TimerTask() {
                         @Override
                         public void run() {
                             SwingUtilities.invokeLater(() -> {
-                                if (step[0] < 3) {
-                                    analysisButtons[step[0]].setVisible(true);
-                                } else if (step[0] == 3) {
-                                    clearButton.setVisible(true);
-                                } else {
-                                    timer.cancel();
-                                }
+                                if (step[0] < 3) analysisButtons[step[0]].setVisible(true);
+                                else if (step[0] == 3) clearButton.setVisible(true);
+                                else timer.cancel();
                                 step[0]++;
                             });
                         }
                     }, 0, 160);
 
-                    // Show Custom Success Dialog
                     CustomDialog.showMessage(parent, "Success!", "File loaded successfully!\n" + file.getName(), false);
 
                 } catch (Exception ex) {
@@ -169,66 +141,38 @@ public class OpenFile {
                     CustomDialog.showMessage(parent, "Error", "Failed to read file!\n" + ex.getMessage(), true);
                 }
             }
-
-            // --- 2. LEXICAL ANALYSIS BUTTON ---
         } else if ("Lexical".equals(text) && fileLoaded) {
             String code = SourceCode.getText().trim();
-            if (code.isEmpty()) {
-                CustomDialog.showMessage(parent, "Empty Code", "No code to analyze!", true);
-                return;
-            }
             LexicalAnalysis lexer = new LexicalAnalysis();
             lexer.analyze(code);
             Result.setResultText(lexer.output);
-            if (Result.isShowingSource())
-                Result.toggleSourceCode();
-
-            // --- 3. SYNTAX ANALYSIS BUTTON ---
+            if (Result.isShowingSource()) Result.toggleSourceCode();
         } else if ("Syntax".equals(text) && fileLoaded) {
             String code = SourceCode.getText().trim();
-
-            // Step A: Run Lexer first (Need tokens)
             LexicalAnalysis lexer = new LexicalAnalysis();
             lexer.analyze(code);
-
             if (lexer.isSuccess) {
-                // Step B: Pass tokens to Syntax Analyzer
                 SyntaxAnalysis syntax = new SyntaxAnalysis(lexer.getLexemes());
                 syntax.analyze();
-
-                // Step C: Display Syntax Result
                 Result.setResultText(syntax.output);
             } else {
                 Result.setResultText("Syntax Analysis Aborted.\nLexical Errors found:\n\n" + lexer.output);
                 CustomDialog.showMessage(parent, "Lexical Error", "Fix lexical errors before checking syntax!", true);
             }
-
-            if (Result.isShowingSource())
-                Result.toggleSourceCode();
-
-            // --- 4. SEMANTIC ANALYSIS BUTTON ---
+            if (Result.isShowingSource()) Result.toggleSourceCode();
         } else if ("Semantics".equals(text) && fileLoaded) {
             String code = SourceCode.getText().trim();
-
-            // Step A: Run Lexer first (Need tokens)
             LexicalAnalysis lexer = new LexicalAnalysis();
             lexer.analyze(code);
-
             if (lexer.isSuccess) {
-                // Step B: Pass tokens to Semantic Analyzer
                 SemanticAnalysis semantic = new SemanticAnalysis(lexer.getLexemes());
                 semantic.analyze();
-
-                // Step C: Display Semantic Result
                 Result.setResultText(semantic.output);
             } else {
                 Result.setResultText("Semantic Analysis Aborted.\nLexical Errors found:\n\n" + lexer.output);
-                CustomDialog.showMessage(parent, "Lexical Error", "Fix lexical errors before checking semantics!",
-                        true);
+                CustomDialog.showMessage(parent, "Lexical Error", "Fix lexical errors before checking semantics!", true);
             }
-
-            if (Result.isShowingSource())
-                Result.toggleSourceCode();
+            if (Result.isShowingSource()) Result.toggleSourceCode();
         }
     }
 }

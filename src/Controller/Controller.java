@@ -1,4 +1,4 @@
-package Controller;
+/*package Controller;
 
 import static Model.OpenFile.readFile;
 
@@ -15,4 +15,4 @@ public class Controller {
             System.out.println("Failed to read the file.");
         }
     }
-}
+}*/

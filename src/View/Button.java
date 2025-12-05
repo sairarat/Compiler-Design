@@ -1,7 +1,6 @@
 package View;
 
 import View.Constants.CustomColors;
-
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -13,9 +12,8 @@ import java.net.URL;
 
 public class Button {
 
-    private static final Font BUTTON_FONT = new Font("Segoe UI", Font.BOLD, 23);
+    private static final Font BUTTON_FONT = new Font("Segoe UI", Font.BOLD, 20);
 
-    // Images
     private static final ImageIcon BTN_NORMAL  = loadImage("Assets/Pink Button.png");
     private static final ImageIcon BTN_HOVER   = loadImage("Assets/Pink Button Hover.png");
     private static final ImageIcon BTN_PRESSED = loadImage("Assets/Pink Button Pressed.png");
@@ -25,27 +23,20 @@ public class Button {
         return (url != null) ? new ImageIcon(url) : null;
     }
 
-    // --- SOUND METHOD ---
     private static void playClickSound() {
         try {
-            // Updated to look for your new .wav file
             URL url = Button.class.getResource("/Assets/Click Sound.wav");
-
             if (url != null) {
-                // Open and play the sound clip
                 AudioInputStream audioIn = AudioSystem.getAudioInputStream(url);
                 Clip clip = AudioSystem.getClip();
                 clip.open(audioIn);
                 clip.start();
-            } else {
-                System.err.println("Sound file not found! Check 'src/Assets/Click Sound.wav'");
             }
         } catch (Exception e) {
-            e.printStackTrace(); // Prints error if file is corrupt or unreadable
+            e.printStackTrace();
         }
     }
 
-    // Custom Sidebar Buttons
     public static JButton createCuteButton(String text) {
         return new JButton(text) {
             {
@@ -56,11 +47,11 @@ public class Button {
                 setFocusPainted(false);
                 setOpaque(false);
                 setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                setPreferredSize(new Dimension(250, 110));
-                setMinimumSize(new Dimension(250, 110));
-                setMaximumSize(new Dimension(250, 110));
 
-                // Add Sound Listener
+                setPreferredSize(new Dimension(250, 95));
+                setMinimumSize(new Dimension(250, 95));
+                setMaximumSize(new Dimension(250, 95));
+
                 addMouseListener(new MouseAdapter() {
                     @Override
                     public void mousePressed(MouseEvent e) {
@@ -97,7 +88,8 @@ public class Button {
 
                 FontMetrics fm = g2.getFontMetrics();
                 int x = (w - fm.stringWidth(getText())) / 2;
-                int y = (h - fm.getHeight()) / 2 + fm.getAscent();
+                // Vertical centering fix for the new height
+                int y = (h - fm.getHeight()) / 2 + fm.getAscent() - 2;
                 g2.setColor(getForeground());
                 g2.drawString(getText(), x, y);
 
@@ -106,7 +98,6 @@ public class Button {
         };
     }
 
-    // Image-only button
     public static JButton createImageOnlyButton(String imagePath) {
         return new JButton() {
             private final ImageIcon normal  = loadImage(imagePath);
@@ -123,7 +114,6 @@ public class Button {
                 setMinimumSize(new Dimension(96, 96));
                 setMaximumSize(new Dimension(96, 96));
 
-                // Add Sound Listener
                 addMouseListener(new MouseAdapter() {
                     @Override
                     public void mousePressed(MouseEvent e) {
